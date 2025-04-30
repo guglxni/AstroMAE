@@ -1,0 +1,7 @@
+dataset_dir: ./data/processed/
+image_size: 128
+batch_size: 8
+mask_ratio: 0.75
+epochs: 10
+learning_rate: 1e-4
+checkpoint_dir: ./outputs/checkpoints/

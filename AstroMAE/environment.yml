@@ -1,0 +1,16 @@
+name: astromae
+channels:
+- pytorch-nightly
+- conda-forge
+dependencies:
+- python=3.11
+- pytorch
+- torchvision
+- torchaudio
+- timm
+- transformers
+- matplotlib
+- pandas
+- seaborn
+- scikit-learn
+- jupyterlab
