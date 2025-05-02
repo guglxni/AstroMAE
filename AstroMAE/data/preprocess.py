@@ -1,1 +1,0 @@
-# This script will handle image resizing or light-curve formatting

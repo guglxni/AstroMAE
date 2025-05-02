@@ -9,7 +9,7 @@ import torch.optim as optim
 
 # Training loop
 class Trainer:
-    def __init__(self, config_path='../config.yaml'):
+    def __init__(self, config_path='config.yaml'):
         with open(config_path, 'r') as f:
             self.config = yaml.safe_load(f)
 
@@ -17,14 +17,14 @@ class Trainer:
         print(f"Using device: {self.device}")
 
         # Create necessary directories
-        self.checkpoint_dir = os.path.join('..', self.config['checkpoint_dir']) # Relative to project root
-        self.log_dir = os.path.join('..', 'outputs') # Relative to project root
+        self.checkpoint_dir = self.config['checkpoint_dir'] # Relative to project root
+        self.log_dir = 'outputs' # Relative to project root
         os.makedirs(self.checkpoint_dir, exist_ok=True)
         os.makedirs(self.log_dir, exist_ok=True)
         self.log_file = os.path.join(self.log_dir, 'train_log.csv')
 
         # Data Loader
-        dataset_path = os.path.join('..', self.config['dataset_dir']) # Relative to project root
+        dataset_path = self.config['dataset_dir'] # Relative to project root
         self.dataloader = create_dataloader(
             dataset_dir=dataset_path,
             image_size=self.config['image_size'],
@@ -102,7 +102,7 @@ class Trainer:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train AstroMAE Model')
-    parser.add_argument('--config', type=str, default='../config.yaml', help='Path to the configuration file')
+    parser.add_argument('--config', type=str, default='config.yaml', help='Path to the configuration file')
     args = parser.parse_args()
 
     try:
