@@ -50,7 +50,11 @@ class Trainer:
         ).to(self.device)
 
         # Optimizer
-        self.optimizer = optim.AdamW(self.model.parameters(), lr=self.config['learning_rate'], weight_decay=0.05)
+        self.optimizer = optim.AdamW(
+            self.model.parameters(),
+            lr=float(self.config['learning_rate']),
+            weight_decay=0.05,
+        )
 
         # Logging setup
         self.log_data = []
