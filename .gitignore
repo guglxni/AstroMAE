@@ -25,9 +25,8 @@ MANIFEST
 *.pth
 *.pt
 
-# Data files
-data/
-!configs/data/
+# Data files (top-level only; do not ignore the astromae/data package)
+/data/
 
 # Outputs
 outputs/

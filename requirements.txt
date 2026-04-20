@@ -12,3 +12,4 @@ tqdm>=4.65
 matplotlib>=3.7
 seaborn>=0.13
 tensorboard>=2.14
+astropy>=6.0
