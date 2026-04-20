@@ -32,9 +32,7 @@ def test_jepa_ema_update_moves_target_toward_context():
     model._ema_update()
     post = [p.data for p in model.target_encoder.parameters()]
     # Each target parameter should have moved toward its context counterpart.
-    for pre_p, post_p, ctx_p in zip(
-        pre, post, model.context_encoder.parameters(), strict=True
-    ):
+    for pre_p, post_p, ctx_p in zip(pre, post, model.context_encoder.parameters(), strict=True):
         assert (post_p - pre_p).abs().mean() > 0
         # Distance to context decreased.
         assert (post_p - ctx_p.data).abs().mean() <= (pre_p - ctx_p.data).abs().mean()
@@ -50,9 +48,7 @@ def test_jepa_disjoint_context_target_masks():
 def test_jepa_loss_decreases_on_fixed_batch():
     torch.manual_seed(0)
     model = ijepa_tiny(img_size=32, patch_size=16, in_chans=3)
-    opt = torch.optim.AdamW(
-        [p for p in model.parameters() if p.requires_grad], lr=5e-3
-    )
+    opt = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=5e-3)
     imgs = torch.rand(4, 3, 32, 32)
     losses = []
     for _ in range(30):

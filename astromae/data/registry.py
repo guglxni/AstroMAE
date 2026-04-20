@@ -8,8 +8,8 @@ evaluation-protocol.md §4).
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable
 
 
 @dataclass
@@ -31,9 +31,7 @@ def register(spec: SurveySpec) -> None:
 
 def get(name: str) -> SurveySpec:
     if name not in _REGISTRY:
-        raise KeyError(
-            f"Unknown survey '{name}'. Registered: {sorted(_REGISTRY.keys())}"
-        )
+        raise KeyError(f"Unknown survey '{name}'. Registered: {sorted(_REGISTRY.keys())}")
     return _REGISTRY[name]
 
 

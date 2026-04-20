@@ -30,20 +30,14 @@ Two forms are provided:
 
 from __future__ import annotations
 
-from typing import Optional
-
 import torch
 
 
-def patchify_with_channels(
-    imgs: torch.Tensor, patch_size: int, in_chans: int
-) -> torch.Tensor:
+def patchify_with_channels(imgs: torch.Tensor, patch_size: int, in_chans: int) -> torch.Tensor:
     """(N, C, H, W) -> (N, L, p*p*C)."""
     p, c = patch_size, in_chans
     if imgs.shape[2] != imgs.shape[3] or imgs.shape[2] % p != 0:
-        raise ValueError(
-            f"Expected square input divisible by {p}, got {tuple(imgs.shape)}"
-        )
+        raise ValueError(f"Expected square input divisible by {p}, got {tuple(imgs.shape)}")
     h = w = imgs.shape[2] // p
     x = imgs.reshape(imgs.shape[0], c, h, p, w, p)
     x = torch.einsum("nchpwq->nhwpqc", x)
@@ -169,9 +163,7 @@ def equivariance_regulariser(
     return torch.stack(losses).mean()
 
 
-def patchify_ivar(
-    ivar: torch.Tensor, patch_size: int, in_chans: Optional[int] = None
-) -> torch.Tensor:
+def patchify_ivar(ivar: torch.Tensor, patch_size: int, in_chans: int | None = None) -> torch.Tensor:
     """Patchify an IVAR map with the same shape contract as the target patches."""
     c = ivar.shape[1] if in_chans is None else in_chans
     return patchify_with_channels(ivar, patch_size, c)

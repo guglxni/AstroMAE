@@ -16,10 +16,9 @@ def _synthetic_emb_regression(n=200, d=16, seed=0):
     rng = np.random.default_rng(seed)
     z = rng.uniform(0.05, 1.5, size=n).astype(np.float32)
     direction = rng.normal(size=d).astype(np.float32)
-    emb = (
-        np.outer(z, direction)
-        + 0.2 * rng.normal(size=(n, d)).astype(np.float32)
-    ).astype(np.float32)
+    emb = (np.outer(z, direction) + 0.2 * rng.normal(size=(n, d)).astype(np.float32)).astype(
+        np.float32
+    )
     return emb, z
 
 
@@ -58,8 +57,8 @@ def test_photoz_mdn_trains_and_reports_finite_metrics():
     assert m.crps > 0
     assert 0.0 <= m.pit_mean <= 1.0
     assert m.pit_std >= 0
-    # Weak bound — the synthetic dataset is deliberately easy, so the
-    # σ_NMAD should be well under the raw redshift scatter.
+    # Weak bound - the synthetic dataset is deliberately easy, so the
+    # sigma_NMAD should be well under the raw redshift scatter.
     assert m.nmad < 0.4
 
 

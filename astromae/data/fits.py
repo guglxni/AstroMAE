@@ -21,9 +21,10 @@ Notes on FITS conventions used here
 from __future__ import annotations
 
 import logging
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional, Sequence
+from typing import Any
 
 import numpy as np
 import torch
@@ -62,9 +63,7 @@ def _lazy_astropy():
     return fits
 
 
-def _stack_bands(
-    hdul, bands: Sequence[str], data_key: str | None = None
-) -> np.ndarray | None:
+def _stack_bands(hdul, bands: Sequence[str], data_key: str | None = None) -> np.ndarray | None:
     """Return (C, H, W) for a list of band EXTNAMEs, or None if not found.
 
     ``data_key=None`` matches the plain band name (e.g. ``G``); otherwise only
@@ -154,10 +153,7 @@ def load_fits_cutout(
             if key in header:
                 meta[key.lower()] = header[key]
 
-    if ivar is None:
-        ivar = np.ones_like(image, dtype=np.float32)
-    else:
-        ivar = ivar.astype(np.float32)
+    ivar = np.ones_like(image, dtype=np.float32) if ivar is None else ivar.astype(np.float32)
 
     if mask is not None:
         if mask.ndim == 2:
@@ -178,17 +174,15 @@ def load_fits_cutout(
 def save_fits_cutout(
     path: Path | str,
     image: np.ndarray | torch.Tensor,
-    ivar: Optional[np.ndarray | torch.Tensor] = None,
+    ivar: np.ndarray | torch.Tensor | None = None,
     bands: Sequence[str] = ("g", "r", "z"),
-    header: Optional[dict[str, Any]] = None,
+    header: dict[str, Any] | None = None,
 ) -> Path:
     """Write a (C, H, W) image (and optional IVAR) to a multi-extension FITS file."""
     fits = _lazy_astropy()
     image_np = image.cpu().numpy() if isinstance(image, torch.Tensor) else np.asarray(image)
     if image_np.ndim != 3 or image_np.shape[0] != len(bands):
-        raise ValueError(
-            f"expected image shape (C={len(bands)}, H, W); got {image_np.shape}"
-        )
+        raise ValueError(f"expected image shape (C={len(bands)}, H, W); got {image_np.shape}")
 
     hdul = fits.HDUList([fits.PrimaryHDU()])
     if header:

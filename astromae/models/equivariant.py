@@ -31,13 +31,12 @@ Implementation notes
 from __future__ import annotations
 
 import math
-from functools import partial
 
 import numpy as np
 import torch
 import torch.nn as nn
 
-from astromae.models.mae import MaskedAutoencoder, _DEFAULT_NORM
+from astromae.models.mae import _DEFAULT_NORM, MaskedAutoencoder
 
 # ---------------------------------------------------------------------------
 # Patch embed
@@ -60,15 +59,11 @@ class RotEquivPatchEmbed(nn.Module):
     ) -> None:
         super().__init__()
         if img_size % patch_size != 0:
-            raise ValueError(
-                f"img_size {img_size} must be divisible by patch_size {patch_size}"
-            )
+            raise ValueError(f"img_size {img_size} must be divisible by patch_size {patch_size}")
         self.img_size = (img_size, img_size)
         self.patch_size = (patch_size, patch_size)
         self.num_patches = (img_size // patch_size) ** 2
-        self.proj = nn.Conv2d(
-            in_chans, embed_dim, kernel_size=patch_size, stride=patch_size
-        )
+        self.proj = nn.Conv2d(in_chans, embed_dim, kernel_size=patch_size, stride=patch_size)
         self.grid_size = img_size // patch_size
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -122,12 +117,8 @@ def c4_polar_positional_embedding(
     freqs_theta = np.arange(1, embed_dim // 4 + 1, dtype=np.float32)
 
     # r-channels: sin / cos at several frequencies.
-    r_sin = np.stack(
-        [np.sin(2 * math.pi * f * r) for f in freqs_r], axis=-1
-    )  # (N, F_r)
-    r_cos = np.stack(
-        [np.cos(2 * math.pi * f * r) for f in freqs_r], axis=-1
-    )
+    r_sin = np.stack([np.sin(2 * math.pi * f * r) for f in freqs_r], axis=-1)  # (N, F_r)
+    r_cos = np.stack([np.cos(2 * math.pi * f * r) for f in freqs_r], axis=-1)
     # θ-channels: sin/cos of 4f*θ is C₄-invariant.
     t_sin = np.stack([np.sin(4.0 * f * theta) for f in freqs_theta], axis=-1)
     t_cos = np.stack([np.cos(4.0 * f * theta) for f in freqs_theta], axis=-1)
@@ -263,11 +254,9 @@ def mae_c4_base(
     )
 
 
-def c4_equivariance_error(
-    model: MaskedAutoencoder, imgs: torch.Tensor
-) -> torch.Tensor:
-    """Mean relative embedding distance ``‖f(R_k x) − f(x)‖ / ‖f(x)‖`` for
-    k ∈ {1, 2, 3} in the C₄ group.
+def c4_equivariance_error(model: MaskedAutoencoder, imgs: torch.Tensor) -> torch.Tensor:
+    """Mean relative embedding distance ``||f(R_k x) - f(x)|| / ||f(x)||``
+    for k in {1, 2, 3} in the C_4 group.
 
     Used by the falsifiable-prediction test for C2: vanilla MAE should
     have error ≫ 0 while C₄-MAE should be near zero.

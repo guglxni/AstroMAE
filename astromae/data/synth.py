@@ -9,9 +9,9 @@ stack sees something indistinguishable from a real cutout.
 from __future__ import annotations
 
 import logging
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Sequence
 
 import numpy as np
 import torch
@@ -163,9 +163,12 @@ def make_synthetic_cutout(
             r = np.sqrt((xx - center[0]) ** 2 + (yy - center[1]) ** 2)
             theta = np.arctan2(yy - center[1], xx - center[0])
             arc_r = r_eff * 2.2
-            arc = 0.1 * flux * np.exp(
-                -((r - arc_r) ** 2) / (2.0 * (size * 0.03) ** 2)
-            ) * np.exp(-((theta - pa) ** 2) / (2.0 * 0.25**2))
+            arc = (
+                0.1
+                * flux
+                * np.exp(-((r - arc_r) ** 2) / (2.0 * (size * 0.03) ** 2))
+                * np.exp(-((theta - pa) ** 2) / (2.0 * 0.25**2))
+            )
             galaxy = galaxy + arc.astype(np.float32)
         clean[c] = galaxy
 
@@ -220,7 +223,7 @@ def make_synthetic_fits_dataset(
         class_dir = output_dir / f"class_{c}"
         class_dir.mkdir(exist_ok=True)
         for i in range(per_class):
-            image, ivar, meta = make_synthetic_cutout(
+            image, ivar, _meta = make_synthetic_cutout(
                 size=size,
                 bands=bands,
                 survey=survey,

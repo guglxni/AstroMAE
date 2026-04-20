@@ -50,9 +50,7 @@ def test_load_file_without_ivar_returns_ones(tmp_path):
 
 
 def test_fits_dataset_lists_classes(tmp_path):
-    make_synthetic_fits_dataset(
-        tmp_path / "set", num_classes=3, per_class=2, size=16, seed=0
-    )
+    make_synthetic_fits_dataset(tmp_path / "set", num_classes=3, per_class=2, size=16, seed=0)
     ds = FITSCutoutDataset(tmp_path / "set", bands=("g", "r", "z"))
     assert len(ds) == 6
     assert ds.classes == ["class_0", "class_1", "class_2"]

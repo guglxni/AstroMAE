@@ -2,8 +2,8 @@
 
 Falsifiable prediction target (from aidlc-docs/research/novel-contributions.md):
 the CLS-token embedding of the equivariant MAE satisfies
-``‖f(rot(x)) - f(x)‖₂ / ‖f(x)‖₂ ≤ 0.01`` for rot ∈ C₄, while vanilla MAE's
-error is 0.1–0.3.
+``||f(rot(x)) - f(x)||_2 / ||f(x)||_2 <= 0.01`` for rot in C_4,
+while vanilla MAE's error is 0.1 to 0.3.
 """
 
 from __future__ import annotations
@@ -40,7 +40,7 @@ def test_polar_pos_embed_shape_and_cls_zero():
 def test_mae_c4_tiny_forward_runs():
     model = mae_c4_tiny(img_size=32, patch_size=16, in_chans=3)
     x = torch.rand(2, 3, 32, 32)
-    loss, pred, mask = model(x, mask_ratio=0.5)
+    loss, pred, _ = model(x, mask_ratio=0.5)
     assert torch.isfinite(loss)
     assert pred.shape[0] == 2
 

@@ -13,8 +13,8 @@ morphology_probe and extract_embeddings paths.
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
 
 import numpy as np
 import torch
@@ -76,6 +76,4 @@ def cross_survey_probe(
         cross.accuracy,
         drop,
     )
-    return CrossSurveyMetrics(
-        same_survey=same, cross_survey=cross, accuracy_drop=drop
-    )
+    return CrossSurveyMetrics(same_survey=same, cross_survey=cross, accuracy_drop=drop)

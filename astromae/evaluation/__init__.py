@@ -1,6 +1,5 @@
 """Downstream evaluation: embeddings, linear probes, reconstruction."""
 
-from astromae.evaluation.embed import extract_embeddings, load_model_from_checkpoint
 from astromae.evaluation.baselines import (
     ResNet18Baseline,
     SupervisedMetrics,
@@ -8,6 +7,7 @@ from astromae.evaluation.baselines import (
     train_resnet18_baseline,
 )
 from astromae.evaluation.cross_survey import CrossSurveyMetrics, cross_survey_probe
+from astromae.evaluation.embed import extract_embeddings, load_model_from_checkpoint
 from astromae.evaluation.heads import (
     AnomalyMetrics,
     PhotoZMDN,

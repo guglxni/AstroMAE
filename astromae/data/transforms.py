@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Optional, Sequence
 
 import torch
 
@@ -35,8 +35,8 @@ class AsinhStretch:
         self.softening = softening
 
     def __call__(
-        self, image: torch.Tensor, ivar: Optional[torch.Tensor] = None
-    ) -> tuple[torch.Tensor, Optional[torch.Tensor]]:
+        self, image: torch.Tensor, ivar: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor | None]:
         stretched = torch.asinh(image / max(self.softening, 1e-12))
         if ivar is None:
             return stretched, None
@@ -61,8 +61,8 @@ class BandNormalize:
         self.std = torch.tensor(std, dtype=torch.float32)
 
     def __call__(
-        self, image: torch.Tensor, ivar: Optional[torch.Tensor] = None
-    ) -> tuple[torch.Tensor, Optional[torch.Tensor]]:
+        self, image: torch.Tensor, ivar: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor | None]:
         mean = self.mean.view(-1, 1, 1).to(image)
         std = self.std.view(-1, 1, 1).to(image).clamp(min=1e-6)
         out = (image - mean) / std
@@ -77,8 +77,8 @@ class Compose:
         self.transforms = list(transforms)
 
     def __call__(
-        self, image: torch.Tensor, ivar: Optional[torch.Tensor] = None
-    ) -> tuple[torch.Tensor, Optional[torch.Tensor]]:
+        self, image: torch.Tensor, ivar: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor | None]:
         for t in self.transforms:
             image, ivar = t(image, ivar)
         return image, ivar
@@ -92,14 +92,14 @@ class RandomFlipRotate90:
     IVAR maps transform without resampling artefacts.
     """
 
-    def __init__(self, seed: Optional[int] = None) -> None:
+    def __init__(self, seed: int | None = None) -> None:
         self._rng = torch.Generator()
         if seed is not None:
             self._rng.manual_seed(seed)
 
     def __call__(
-        self, image: torch.Tensor, ivar: Optional[torch.Tensor] = None
-    ) -> tuple[torch.Tensor, Optional[torch.Tensor]]:
+        self, image: torch.Tensor, ivar: torch.Tensor | None = None
+    ) -> tuple[torch.Tensor, torch.Tensor | None]:
         k = int(torch.randint(0, 4, (1,), generator=self._rng).item())
         image = torch.rot90(image, k=k, dims=(-2, -1))
         if ivar is not None:

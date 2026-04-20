@@ -19,7 +19,6 @@ from __future__ import annotations
 import logging
 import math
 from dataclasses import dataclass
-from typing import Optional
 
 import numpy as np
 import torch
@@ -88,8 +87,8 @@ class PhotoZMDN(nn.Module):
     """Mixture density network head for photometric redshift.
 
     Predicts parameters of a K-Gaussian mixture over z from a frozen
-    embedding. Reports σ_NMAD, outlier fraction (|Δz / (1+z)| > 0.15),
-    CRPS, and PIT calibration statistics.
+    embedding. Reports sigma_NMAD, outlier fraction
+    (|dz / (1+z)| > 0.15), CRPS, and PIT calibration statistics.
     """
 
     def __init__(
@@ -114,9 +113,7 @@ class PhotoZMDN(nn.Module):
         self.head_sigma = nn.Linear(hidden_dim, n_components)
         self.head_pi = nn.Linear(hidden_dim, n_components)
 
-    def forward(
-        self, z_embedding: torch.Tensor
-    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    def forward(self, z_embedding: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         h = self.trunk(z_embedding)
         mu = torch.sigmoid(self.head_mu(h)) * (self.z_max - self.z_min) + self.z_min
         sigma = F.softplus(self.head_sigma(h)) + 1e-3
@@ -188,8 +185,8 @@ def train_photoz_mdn(
     batch_size: int = 64,
     test_size: float = 0.2,
     seed: int = 42,
-    device: Optional[str] = None,
-    z_range: Optional[tuple[float, float]] = None,
+    device: str | None = None,
+    z_range: tuple[float, float] | None = None,
 ) -> tuple[PhotoZMDN, PhotoZMetrics]:
     """Fit a :class:`PhotoZMDN` and return it with held-out metrics."""
     from sklearn.model_selection import train_test_split
@@ -293,9 +290,7 @@ def anomaly_probe(
     if len(np.unique(is_anomaly)) < 2:
         raise ValueError("Need at least one anomaly and one normal sample.")
 
-    clf = IsolationForest(
-        contamination=contamination, random_state=seed, n_estimators=100
-    )
+    clf = IsolationForest(contamination=contamination, random_state=seed, n_estimators=100)
     clf.fit(embeddings)
     scores = -clf.score_samples(embeddings)
     auroc = float(roc_auc_score(is_anomaly, scores))

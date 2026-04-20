@@ -36,7 +36,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from astromae.models.mae import _Block, _DEFAULT_NORM, _PatchEmbed
+from astromae.models.mae import _DEFAULT_NORM, _Block, _PatchEmbed
 from astromae.models.pos_embed import get_2d_sincos_pos_embed
 
 
@@ -69,9 +69,7 @@ class _ViTEncoder(nn.Module):
         self.pos_embed = nn.Parameter(
             torch.zeros(1, self.num_patches, embed_dim), requires_grad=False
         )
-        pos = get_2d_sincos_pos_embed(
-            embed_dim, int(self.num_patches**0.5), cls_token=False
-        )
+        pos = get_2d_sincos_pos_embed(embed_dim, int(self.num_patches**0.5), cls_token=False)
         self.pos_embed.data.copy_(torch.from_numpy(pos).float().unsqueeze(0))
         self.blocks = nn.ModuleList(
             [
@@ -92,20 +90,16 @@ class _ViTEncoder(nn.Module):
         keep_mask == 1 tokens are kept; output is (N, K, D)."""
         x = self.patch_embed(imgs) + self.pos_embed
         if keep_mask is not None:
-            n, length, d = x.shape
+            n, _, d = x.shape
             idx = keep_mask.bool()  # (N, L)
             # Variable-length selection per sample. We pack via masked_select
             # but for simplicity (and MAE-matched architecture) we assume
             # every sample keeps the same number of tokens.
             counts = idx.sum(dim=1)
             if not torch.all(counts == counts[0]):
-                raise ValueError(
-                    "_ViTEncoder expects a fixed number of kept tokens per sample"
-                )
+                raise ValueError("_ViTEncoder expects a fixed number of kept tokens per sample")
             k = int(counts[0].item())
-            x = torch.stack(
-                [x[i][idx[i]] for i in range(n)], dim=0
-            )  # (N, K, D)
+            x = torch.stack([x[i][idx[i]] for i in range(n)], dim=0)  # (N, K, D)
             assert x.shape == (n, k, d)
         for blk in self.blocks:
             x = blk(x)
@@ -132,9 +126,7 @@ class _Predictor(nn.Module):
         self.pos_embed = nn.Parameter(
             torch.zeros(1, num_patches, predictor_dim), requires_grad=False
         )
-        pos = get_2d_sincos_pos_embed(
-            predictor_dim, int(num_patches**0.5), cls_token=False
-        )
+        pos = get_2d_sincos_pos_embed(predictor_dim, int(num_patches**0.5), cls_token=False)
         self.pos_embed.data.copy_(torch.from_numpy(pos).float().unsqueeze(0))
         self.blocks = nn.ModuleList(
             [
@@ -325,9 +317,7 @@ class IJEPA(nn.Module):
         return feats.mean(dim=1)
 
 
-def ijepa_tiny(
-    img_size: int = 128, patch_size: int = 16, in_chans: int = 3
-) -> IJEPA:
+def ijepa_tiny(img_size: int = 128, patch_size: int = 16, in_chans: int = 3) -> IJEPA:
     return IJEPA(
         img_size=img_size,
         patch_size=patch_size,
@@ -342,9 +332,7 @@ def ijepa_tiny(
     )
 
 
-def ijepa_small(
-    img_size: int = 128, patch_size: int = 16, in_chans: int = 3
-) -> IJEPA:
+def ijepa_small(img_size: int = 128, patch_size: int = 16, in_chans: int = 3) -> IJEPA:
     return IJEPA(
         img_size=img_size,
         patch_size=patch_size,

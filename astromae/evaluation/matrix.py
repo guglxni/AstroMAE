@@ -16,9 +16,9 @@ from __future__ import annotations
 import json
 import logging
 import time
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Callable
 
 import numpy as np
 import torch
@@ -30,7 +30,7 @@ from astromae.models import (
     mae_c4_tiny,
     mae_tiny,
 )
-# noqa: E501 — IJEPA is imported lazily inside _run_jepa_variant to avoid
+
 # circular imports when this module is used as a smoke test.
 
 logger = logging.getLogger(__name__)
@@ -90,9 +90,7 @@ def _train_mae(
 
 
 def _train_jepa(model, images: torch.Tensor, steps: int, lr: float) -> float:
-    opt = torch.optim.AdamW(
-        [p for p in model.parameters() if p.requires_grad], lr=lr
-    )
+    opt = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=lr)
     g = torch.Generator().manual_seed(7)
     t0 = time.time()
     for _ in range(steps):
@@ -257,9 +255,7 @@ def run_experiment_matrix(
             use_ivar=True,
         )
     )
-    results.append(
-        _run_jepa_variant("jepa", images, labels, seed=seed, steps=steps, lr=lr)
-    )
+    results.append(_run_jepa_variant("jepa", images, labels, seed=seed, steps=steps, lr=lr))
 
     results_path = output_dir / "results.json"
     with open(results_path, "w") as f:

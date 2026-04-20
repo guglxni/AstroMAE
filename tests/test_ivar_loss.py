@@ -71,9 +71,7 @@ def test_ivar_loss_weights_errors_correctly():
     ivar_concentrated[0, 0, 0] = 1000.0
 
     loss_uniform = ivar_weighted_masked_loss(pred, target, mask, ivar_uniform)
-    loss_concentrated = ivar_weighted_masked_loss(
-        pred, target, mask, ivar_concentrated
-    )
+    loss_concentrated = ivar_weighted_masked_loss(pred, target, mask, ivar_concentrated)
     assert loss_concentrated > loss_uniform
 
 
@@ -91,7 +89,7 @@ def test_model_forward_accepts_ivar():
     model = mae_tiny(img_size=32, patch_size=16, in_chans=3)
     imgs = torch.rand(2, 3, 32, 32)
     ivar = torch.rand_like(imgs) + 0.5
-    loss, pred, mask = model(imgs, mask_ratio=0.5, ivar=ivar)
+    loss, _, _ = model(imgs, mask_ratio=0.5, ivar=ivar)
     assert torch.isfinite(loss).all()
 
 
@@ -166,9 +164,10 @@ def test_ivar_training_improves_lsb_reconstruction():
     # so we are not measuring with the loss we trained on (which would
     # be a tautology).
     with torch.no_grad():
-        g_eval = torch.Generator().manual_seed(999)
-        _, pred_patches_mse, _ = model_mse(imgs, mask_ratio=0.0, generator=g_eval)
-        _, pred_patches_iv, _ = model_iv(imgs, mask_ratio=0.0, generator=g_eval)
+        g_eval1 = torch.Generator().manual_seed(999)
+        g_eval2 = torch.Generator().manual_seed(999)
+        _, pred_patches_mse, _ = model_mse(imgs, mask_ratio=0.0, generator=g_eval1)
+        _, pred_patches_iv, _ = model_iv(imgs, mask_ratio=0.0, generator=g_eval2)
         recon_mse = model_mse.unpatchify(pred_patches_mse)
         recon_iv = model_iv.unpatchify(pred_patches_iv)
 

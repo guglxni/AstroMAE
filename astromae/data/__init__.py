@@ -28,6 +28,8 @@ from astromae.data.transforms import (
 )
 
 __all__ = [
+    "SURVEY_A",
+    "SURVEY_B",
     "AsinhStretch",
     "BandNormalize",
     "Compose",
@@ -35,8 +37,6 @@ __all__ = [
     "FITSCutoutDataset",
     "PreprocessedAstroDataset",
     "RandomFlipRotate90",
-    "SURVEY_A",
-    "SURVEY_B",
     "SurveyProfile",
     "SurveySpec",
     "create_dataloader",

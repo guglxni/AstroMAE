@@ -147,6 +147,22 @@ def _cmd_eval_reconstruct(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_experiment_matrix(args: argparse.Namespace) -> int:
+    from astromae.evaluation.matrix import run_experiment_matrix
+
+    results = run_experiment_matrix(
+        args.output_dir,
+        n_per_class=args.n_per_class,
+        num_classes=args.num_classes,
+        size=args.image_size,
+        seed=args.seed,
+        steps=args.steps,
+        lr=args.lr,
+    )
+    logger.info("Matrix complete: %d rows written to %s", len(results), args.output_dir)
+    return 0
+
+
 def _cmd_info(args: argparse.Namespace) -> int:
     from astromae.training.trainer import TrainerConfig
     from astromae.utils.device import select_device
@@ -230,6 +246,24 @@ def build_parser() -> argparse.ArgumentParser:
     p_recon.add_argument("--num-samples", type=int, default=6)
     p_recon.add_argument("--output", type=Path, default=Path("./outputs/reconstruction.png"))
     p_recon.set_defaults(func=_cmd_eval_reconstruct)
+
+    # --- experiment matrix (research-track) ---
+    p_matrix = sub.add_parser(
+        "experiment-matrix",
+        help=(
+            "Run the research-track ablation matrix (mae / mae-iv / mae-c4 / "
+            "mae-c4-iv / jepa) on synthetic Sersic cutouts; "
+            "produces results.json + results.md"
+        ),
+    )
+    p_matrix.add_argument("--output-dir", type=Path, default=Path("./outputs/experiment_matrix"))
+    p_matrix.add_argument("--n-per-class", type=int, default=32)
+    p_matrix.add_argument("--num-classes", type=int, default=2)
+    p_matrix.add_argument("--image-size", type=int, default=32)
+    p_matrix.add_argument("--steps", type=int, default=40)
+    p_matrix.add_argument("--lr", type=float, default=3e-3)
+    p_matrix.add_argument("--seed", type=int, default=0)
+    p_matrix.set_defaults(func=_cmd_experiment_matrix)
 
     # --- info ---
     p_info = sub.add_parser("info", help="Print environment / config info")

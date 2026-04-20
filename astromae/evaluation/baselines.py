@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Optional
 
 import numpy as np
 import torch
@@ -36,7 +35,7 @@ logger = logging.getLogger(__name__)
 def random_encoder_embeddings(
     encoder_factory,
     images: torch.Tensor,
-    device: Optional[torch.device] = None,
+    device: torch.device | None = None,
 ) -> np.ndarray:
     """Return CLS embeddings from an *untrained* encoder.
 
@@ -147,7 +146,7 @@ def train_resnet18_baseline(
     batch_size: int = 16,
     lr: float = 1e-3,
     seed: int = 0,
-    device: Optional[torch.device] = None,
+    device: torch.device | None = None,
     val_fraction: float = 0.2,
 ) -> tuple[ResNet18Baseline, SupervisedMetrics]:
     """Train a ResNet-18 baseline and report held-out metrics."""
@@ -194,9 +193,7 @@ def train_resnet18_baseline(
     accuracy = float((preds == y_np).mean())
     macro_f1 = float(f1_score(y_np, preds, average="macro"))
     params = sum(p.numel() for p in model.parameters())
-    metrics = SupervisedMetrics(
-        accuracy=accuracy, macro_f1=macro_f1, epochs=epochs, params=params
-    )
+    metrics = SupervisedMetrics(accuracy=accuracy, macro_f1=macro_f1, epochs=epochs, params=params)
     logger.info(
         "ResNet-18 baseline: acc=%.4f macro_f1=%.4f params=%d epochs=%d",
         accuracy,
