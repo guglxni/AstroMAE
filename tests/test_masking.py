@@ -1,26 +1,44 @@
 import torch
-import pytest
-from src.model import random_masking
 
-def test_random_masking():
-    # Create a dummy tensor
+from astromae.models.mae import random_masking
+
+
+def test_random_masking_shapes_and_counts():
     x = torch.rand(2, 16, 768)
-    
-    # Apply random masking with 50% ratio
+
     x_masked, mask, ids_restore = random_masking(x, 0.5)
-    
-    # Assert the shapes are correct
+
     assert x_masked.shape == (2, 8, 768)
     assert mask.shape == (2, 16)
-    
-    # Each sample should mask exactly half the patches
+    assert ids_restore.shape == (2, 16)
+
     assert int(mask.sum().item()) == 16
-    
-    # Additional checks
-    assert ids_restore.shape == (2, 16), "Restore indices should have shape (batch_size, seq_len)"
-    
-    # Check that mask is binary (contains only 0s and 1s)
-    assert set(mask.unique().tolist()).issubset({0.0, 1.0}), "Mask should only contain 0s and 1s"
-    
-    # Check that each sample has exactly 8 masked tokens (50% of 16)
-    assert torch.all(mask.sum(dim=1) == 8), "Each sample should have exactly 8 masked tokens"
+    assert set(mask.unique().tolist()).issubset({0.0, 1.0})
+    assert torch.all(mask.sum(dim=1) == 8)
+
+
+def test_random_masking_zero_ratio():
+    x = torch.rand(3, 10, 8)
+    x_masked, mask, _ = random_masking(x, 0.0)
+
+    assert x_masked.shape == (3, 10, 8)
+    assert torch.equal(mask, torch.zeros(3, 10))
+
+
+def test_random_masking_deterministic_with_generator():
+    x = torch.rand(2, 12, 8)
+    g1 = torch.Generator().manual_seed(0)
+    g2 = torch.Generator().manual_seed(0)
+
+    a, mask_a, _ = random_masking(x, 0.5, generator=g1)
+    b, mask_b, _ = random_masking(x, 0.5, generator=g2)
+
+    assert torch.equal(mask_a, mask_b)
+    assert torch.allclose(a, b)
+
+
+def test_random_masking_rejects_bad_ratio():
+    import pytest
+
+    with pytest.raises(ValueError):
+        random_masking(torch.rand(1, 4, 2), 1.0)
