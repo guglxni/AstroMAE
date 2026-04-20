@@ -26,8 +26,8 @@ MANIFEST
 *.pt
 
 # Data files
-data/raw/
-data/processed/
+data/
+!configs/data/
 
 # Outputs
 outputs/
@@ -62,5 +62,9 @@ coverage.xml
 *.cover
 .hypothesis/
 
-# pytest
-.pytest_cache/.aidlc/
+# pytest / ruff caches
+.pytest_cache/
+.ruff_cache/
+
+# AI-DLC locally downloaded rules (regenerated from release)
+.aidlc/

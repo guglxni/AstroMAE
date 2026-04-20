@@ -1,16 +1,25 @@
 name: astromae
 channels:
-- pytorch-nightly
-- conda-forge
+  - pytorch
+  - conda-forge
 dependencies:
-- python=3.11
-- pytorch
-- torchvision
-- torchaudio
-- timm
-- transformers
-- matplotlib
-- pandas
-- seaborn
-- scikit-learn
-- jupyterlab
+  - python=3.11
+  - pip
+  - pytorch>=2.1
+  - torchvision>=0.16
+  - torchaudio
+  - cpuonly            # remove this line and add `pytorch-cuda=12.1` for GPU
+  - numpy>=1.26
+  - pandas>=2.0
+  - scikit-learn>=1.3
+  - matplotlib
+  - seaborn
+  - pillow>=10.0
+  - tqdm
+  - pyyaml
+  - jupyterlab
+  - pip:
+      - timm>=1.0.0
+      - tensorboard>=2.14
+      - astroNN>=1.1
+      - -e .
