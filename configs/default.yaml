@@ -1,0 +1,36 @@
+# Default MAE pretraining config for AstroMAE.
+# Tuned as a reasonable starting point for Galaxy10 @ 128x128 on a single GPU.
+
+dataset_dir: ./data/processed
+image_size: 128
+patch_size: 16
+in_chans: 3
+
+# ViT-Base encoder
+embed_dim: 768
+depth: 12
+num_heads: 12
+decoder_embed_dim: 512
+decoder_depth: 8
+decoder_num_heads: 16
+mlp_ratio: 4.0
+
+# Training
+batch_size: 64
+val_ratio: 0.1
+epochs: 200
+mask_ratio: 0.75
+learning_rate: 1.5e-4
+weight_decay: 0.05
+warmup_epochs: 10
+min_lr_ratio: 0.01
+grad_clip: 1.0
+
+# Runtime
+checkpoint_dir: ./outputs/checkpoints
+log_dir: ./outputs
+save_every: 20
+amp: true
+tensorboard: true
+log_interval: 50
+seed: 42
