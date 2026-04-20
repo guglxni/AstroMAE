@@ -240,22 +240,52 @@ class MaskedAutoencoder(nn.Module):
         return x[:, 1:, :]
 
     def forward_loss(
-        self, imgs: torch.Tensor, pred: torch.Tensor, mask: torch.Tensor
+        self,
+        imgs: torch.Tensor,
+        pred: torch.Tensor,
+        mask: torch.Tensor,
+        ivar: torch.Tensor | None = None,
     ) -> torch.Tensor:
+        """Reconstruction loss.
+
+        When ``ivar`` is ``None`` (default), computes the classical MAE
+        MSE loss on masked patches. When ``ivar`` is provided, computes the
+        IVAR-weighted loss (Contribution C1; see
+        :func:`astromae.training.losses.ivar_weighted_masked_loss`).
+        """
         target = self.patchify(imgs)
-        loss = (pred - target) ** 2
-        loss = loss.mean(dim=-1)
-        return (loss * mask).sum() / mask.sum().clamp(min=1.0)
+        if ivar is None:
+            from astromae.training.losses import mse_masked_loss
+
+            return mse_masked_loss(pred, target, mask)
+
+        from astromae.training.losses import (
+            ivar_weighted_masked_loss,
+            patchify_ivar,
+        )
+
+        ivar_patches = patchify_ivar(ivar, self.patch_size, self.in_chans)
+        return ivar_weighted_masked_loss(pred, target, mask, ivar_patches)
 
     def forward(
         self,
         imgs: torch.Tensor,
         mask_ratio: float = 0.75,
         generator: torch.Generator | None = None,
+        ivar: torch.Tensor | None = None,
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Forward pass.
+
+        Args:
+            imgs: ``(N, C, H, W)`` input.
+            mask_ratio: fraction of patches to mask out.
+            generator: optional RNG for deterministic masking (unit tests).
+            ivar: optional ``(N, C, H, W)`` inverse-variance map; enables
+                the IVAR-weighted loss (Contribution C1).
+        """
         latent, mask, ids_restore = self.forward_encoder(imgs, mask_ratio, generator=generator)
         pred = self.forward_decoder(latent, ids_restore)
-        loss = self.forward_loss(imgs, pred, mask)
+        loss = self.forward_loss(imgs, pred, mask, ivar=ivar)
         return loss, pred, mask
 
     # ------------------------------------------------------------------
